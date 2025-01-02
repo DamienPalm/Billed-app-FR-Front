@@ -27,7 +27,7 @@ export default class NewBill {
     const fileExtension = fileName.split(".").pop().toLowerCase();
     if (!allowedExtensions.includes(fileExtension)) {
       e.target.value = "";
-      alert("Seules les extensions .jepg, .jpg et .png sont acceptées.");
+      alert("Seules les extensions .jpeg, .jpg et .png sont acceptées.");
       return;
     }
     const formData = new FormData();

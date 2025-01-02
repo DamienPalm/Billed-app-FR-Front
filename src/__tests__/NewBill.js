@@ -60,6 +60,55 @@ describe("Given I am connected as an employee", () => {
         expect(handleChangeFile).toBeCalled();
         expect(screen.getByText("Envoyer une note de frais")).toBeTruthy();
       });
+
+      describe("NewBill File Upload", () => {
+        test("should upload file and update bill properties", async () => {
+          const mockFile = new File(["test"], "test.jpg", {
+            type: "image/jpeg",
+          });
+
+          const mockStore = {
+            bills: jest.fn().mockReturnValue({
+              create: jest.fn().mockResolvedValue({
+                fileUrl: "http://example.com/uploaded-file.jpg",
+                key: "unique-bill-key",
+              }),
+            }),
+          };
+
+          const mockLocalStorage = {
+            getItem: jest
+              .fn()
+              .mockReturnValue(JSON.stringify({ email: "test@example.com" })),
+          };
+
+          const newBill = new NewBill({
+            document,
+            onNavigate: jest.fn(),
+            store: mockStore,
+            localStorage: mockLocalStorage,
+          });
+
+          const event = {
+            preventDefault: jest.fn(),
+            target: {
+              value: "C:\\fakepath\\test.jpg",
+              files: [mockFile],
+            },
+          };
+
+          await newBill.handleChangeFile(event);
+
+          expect(mockStore.bills().create).toHaveBeenCalledWith({
+            data: expect.any(FormData),
+            headers: { noContentType: true },
+          });
+
+          expect(newBill.billId).toBe("unique-bill-key");
+          expect(newBill.fileUrl).toBe("http://example.com/uploaded-file.jpg");
+          expect(newBill.fileName).toBe("test.jpg");
+        });
+      });
     });
 
     describe("When I submit form", () => {
